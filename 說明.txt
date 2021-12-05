@@ -1,0 +1,2 @@
+現在所使用的apikey或是client_id都是宜大的gmail所建立的
+url:https://console.cloud.google.com/apis/dashboard?project=youtube-id-333215

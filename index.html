@@ -1,0 +1,137 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <input type="text" id="searchyoutube" />
+    <button onclick="authoyoutube()">查詢</button>
+  </body>
+  <script src="./Max.js"></script>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://apis.google.com/js/client.js"></script>
+    <link rel="stylesheet" href="youtube.css" />
+  </head>
+
+  <script>
+    var player;
+
+    function authenticate() {
+      return gapi.auth2
+        .getAuthInstance()
+        .signIn({
+          scope: "https://www.googleapis.com/auth/youtube.force-ssl",
+        })
+        .then(
+          function () {
+            console.log("Sign-in successful");
+          },
+          function (err) {
+            console.error("Error signing in", err);
+          }
+        );
+    }
+
+    function loadClient() {
+      gapi.client.setApiKey("AIzaSyBhKYLu6TawOHT4_ToAyhXs0lCf0gStntM");
+      return gapi.client
+        .load("https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest")
+        .then(
+          function () {
+            console.log("GAPI client loaded for API");
+          },
+          function (err) {
+            console.error("Error loading GAPI client for API", err);
+          }
+        );
+    }
+    // Make sure the client is loaded and sign-in is complete before calling this method.
+    //search接回去
+    function execute() {
+      return gapi.client.youtube.search
+        .list({
+          part: "snippet",
+          // maxResults: 10,
+          //關鍵字q
+          q: document.getElementById("searchinput").value,
+        })
+        .then(
+          function (response) {
+            // Handle the results here (response.result has the parsed body).
+            console.log("Response", response);
+            //console.log裡所有資料
+            // a.innerHTML = JSON.stringify(response, "etag");
+
+            var numeral = response.result.items.length;
+
+            for (var i = 0; i < numeral; i++) {
+              var parent = document.getElementById("parent");
+              //新增 div
+              var div = document.createElement("div");
+              //設定 div 屬性，如 id
+              var divid = "yt" + [i];
+              div.setAttribute("id", divid);
+              div.setAttribute("class", "classspacing");
+              parent.appendChild(div);
+              //class
+
+              //var a = div.setAttribute("id", [i]);
+              var vidd = response.result.items[i].id.videoId;
+              div.player = new YT.Player(divid, {
+                height: "200",
+                width: "300",
+                videoId: vidd,
+                events: {
+                  onReady: onPlayerReady,
+                },
+              });
+            }
+          },
+          function (err) {
+            console.error("Execute error", err);
+          }
+        );
+
+      ///
+      function onPlayerReady(e) {
+        // 為確保瀏覽器上可以自動播放，要把影片調成靜音
+        e.target.mute().playVideo();
+      }
+    }
+
+    gapi.load("client:auth2", function () {
+      gapi.auth2.init({
+        client_id:
+          "155099321193-d8hrekpo0sp758kqjc4jslahs3vkksto.apps.googleusercontent.com",
+      });
+      //自動
+      // $("#auth").load("click", authenticate());
+    });
+  </script>
+  <div style="width: 100%; text-align: center">
+    <input type="text" id="searchinput" placeholder="搜尋" />
+    <button id="auth" onclick="authenticate().then(loadClient)">
+      authorize and load
+    </button>
+    <button onclick="execute()">Search</button>
+  </div>
+  <div>
+    <div id="parent" class="classspacing"></div>
+  </div>
+
+  <body></body>
+</html>
